@@ -18,7 +18,6 @@ public class ProductService {
     public ProductResDto createProduct(ProductReqDto requestDto, String userId) {
         Product product = requestDto.toEntity();
         product.setCreated(userId);
-        product.setUpdated(userId);
         return productRepository.save(product).toResDto();
     }
 
@@ -28,8 +27,8 @@ public class ProductService {
                 .filter(p -> p.getDeletedAt() == null)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found or has been deleted"));
 
-        product.updateProduct(requestDto.getName(), requestDto.getDescription(), requestDto.getPrice(), requestDto.getQuantity());
-        product.setUpdated(userId);
+        product.updateProduct(requestDto.getName(), requestDto.getDescription(),
+                requestDto.getPrice(), requestDto.getQuantity(), userId);
         return product.toResDto();
     }
 
@@ -58,7 +57,7 @@ public class ProductService {
             throw new IllegalArgumentException("Not Enough Product");
         }
 
-        product.updateProduct(product.getName(), product.getDescription(), product.getPrice(), product.getQuantity() - quantity);
-        product.setUpdated(userId);
+        product.updateProduct(product.getName(), product.getDescription(),
+                product.getPrice(), product.getQuantity() - quantity, userId);
     }
 }

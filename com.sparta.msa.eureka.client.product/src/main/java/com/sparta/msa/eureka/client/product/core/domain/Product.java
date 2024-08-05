@@ -39,10 +39,7 @@ public class Product {
 
     public void setCreated(String userId){
         this.createdBy = userId;
-    }
-
-    public void setUpdated(String userId){
-        this.updatedBy = userId;
+        this.updatedBy = userId; // LastModifiedDate는 생성시에도 값이 입력 됨
     }
 
     public void setDeleted(String userId){
@@ -50,11 +47,12 @@ public class Product {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void updateProduct(String name, String description, Integer price, Integer quantity){
+    public void updateProduct(String name, String description, Integer price, Integer quantity, String userId){
         this.name = name;
         this.description = description;
         this.price = price;
         this.quantity = quantity;
+        this.updatedBy = userId;
     }
 
     public ProductResDto toResDto(){
