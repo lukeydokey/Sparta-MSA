@@ -1,6 +1,8 @@
 package com.sparta.msa_exam.product.products;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+
+    @Value("${server.port}")
+    private int serverPort;
 
     /*
     상품 등록
@@ -25,7 +30,9 @@ public class ProductController {
     public ResponseEntity<ProductResDto> createProduct(@RequestBody ProductReqDto reqDto,
                                                        @RequestHeader(value = "X-User-Id") String userId) {
         ProductResDto res = productService.createProduct(reqDto, userId);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Server-Port", String.valueOf(serverPort))
+                .body(res);
     }
 
     /*
@@ -39,7 +46,9 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseEntity<ProductResDto> getProductById(@PathVariable Long productId) {
         ProductResDto res = productService.getProductById(productId);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Server-Port", String.valueOf(serverPort))
+                .body(res);
     }
 
     /*
@@ -56,7 +65,9 @@ public class ProductController {
     public ResponseEntity<ProductResDto> updateProduct(@PathVariable Long productId,
                                                        @RequestBody ProductReqDto reqDto, @RequestHeader(value = "X-User-Id") String userId) {
         ProductResDto res = productService.updateProduct(productId, reqDto, userId);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Server-Port", String.valueOf(serverPort))
+                .body(res);
     }
 
     /*
@@ -73,7 +84,9 @@ public class ProductController {
     public ResponseEntity<String> deleteProduct(@PathVariable Long productId,
                                                 @RequestHeader(value = "X-User-Id") String userId) {
         productService.deleteProduct(productId, userId);
-        return ResponseEntity.ok("Deleted product successfully");
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Server-Port", String.valueOf(serverPort))
+                .body("Deleted product successfully");
     }
 
     /*
