@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:mysql://sparta-db.cxy82680i82o.ap-northeast-2.rds.amazonaws.com:3306/msa_exam
+    username: admin
+    password: # Option으로 Password 입력
+    driver-class-name: com.mysql.cj.jdbc.Driver
+eureka:
+  client:
+    service-url:
+      defaultZone: # Option으로 eureka 서버 url 입력
