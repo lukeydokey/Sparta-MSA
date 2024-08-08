@@ -50,16 +50,6 @@
     ```
 - /api/products/{productId} (DELETE)
 - /api/products/{productId}/updateQuantity?quantity={quantity} (PUT)
-  - Request Parameter : quantity
-  - Request Body
-    ```json
-      {
-          "name" : "상품",
-          "description" : "상품 설명",
-          "price" : 10000,
-          "quantity" : 5
-      }
-      ```
 
 ---
 
