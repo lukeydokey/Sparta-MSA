@@ -28,6 +28,9 @@ ext {
 }
 
 dependencies {
+	// 캐싱
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	// 분산 추적
 	implementation 'io.github.openfeign:feign-micrometer'
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'

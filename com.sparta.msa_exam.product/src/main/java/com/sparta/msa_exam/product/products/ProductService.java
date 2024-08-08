@@ -3,6 +3,10 @@ package com.sparta.msa_exam.product.products;
 import com.sparta.msa_exam.product.core.domain.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,8 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    @CachePut(cacheNames = "productCache", key = "#result.id")
+    @CacheEvict(cacheNames = "allProductsCache", allEntries = true)
     @Transactional
     public ProductResDto createProduct(ProductReqDto requestDto, String userId) {
         Product product = requestDto.toEntity();
@@ -25,6 +31,8 @@ public class ProductService {
         return productRepository.save(product).toResDto();
     }
 
+    @CachePut(cacheNames = "productCache", key = "args[0]")
+    @CacheEvict(cacheNames = "allProductsCache", allEntries = true)
     @Transactional
     public ProductResDto updateProduct(Long productId,ProductReqDto requestDto, String userId) {
         Product product = productRepository.findById(productId)
@@ -36,6 +44,12 @@ public class ProductService {
         return product.toResDto();
     }
 
+    @Caching(
+        evict = {
+                @CacheEvict(cacheNames = "allProductsCache", allEntries = true),
+                @CacheEvict(cacheNames = "productCache", key = "args[0]")
+        }
+    )
     @Transactional
     public void deleteProduct(Long productId, String userId) {
         Product product = productRepository.findById(productId)
@@ -44,6 +58,7 @@ public class ProductService {
         product.setDeleted(userId);
     }
 
+    @Cacheable(cacheNames = "allProductsCache", key = "methodName")
     public List<ProductResDto> getAllProducts(){
         try{
             return productRepository.findAll()
@@ -54,6 +69,7 @@ public class ProductService {
         }
     }
 
+    @Cacheable(cacheNames = "productCache", key = "args[0]")
     public ProductResDto getProductById(Long productId){
         Product product = productRepository.findById(productId)
                 .filter(p -> p.getDeletedAt() == null)
@@ -61,8 +77,11 @@ public class ProductService {
         return product.toResDto();
     }
 
+    @CachePut(cacheNames = "productCache", key = "#result.id")
+    @CacheEvict(cacheNames = "allProductsCache", allEntries = true)
     @Transactional
-    public void updateQuantity(Long productId, Integer quantity, String userId) {
+    public ProductResDto updateQuantity(Long productId, Integer quantity, String userId) {
+        log.info("Product Id: " + productId + " Quantity: " + quantity);
         Product product = productRepository.findById(productId)
                 .filter(p -> p.getDeletedAt() == null)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found or has been deleted"));
@@ -73,5 +92,6 @@ public class ProductService {
 
         product.updateProduct(product.getName(), product.getDescription(),
                 product.getPrice(), product.getQuantity() + quantity, userId);
+        return product.toResDto();
     }
 }
