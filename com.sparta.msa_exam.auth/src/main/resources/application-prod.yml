@@ -11,3 +11,8 @@ eureka:
   client:
     service-url:
       defaultZone: # Option으로 eureka 서버 url 입력
+
+management:
+  zipkin:
+    tracing:
+      endpoint: # Option으로 zipkins endpoint url 입력
