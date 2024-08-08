@@ -12,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -26,13 +27,18 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @ElementCollection
-    @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
-    @Column(name = "order_item_id")
-    private List<Long> orderItemIds;
+//    @ElementCollection
+//    @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
+//    @Column(name = "order_item_id")
+//    private List<Long> orderItemIds;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -54,8 +60,17 @@ public class Order {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void updateOrder(List<Long> orderItemIds, OrderStatus status, String userId) {
-        this.orderItemIds = orderItemIds;
+    public void addOrderProducts(OrderProduct orderProduct){
+        orderProducts.add(orderProduct);
+        orderProduct.setOrder(this);
+    }
+
+    public void updateOrder(String name, List<Long> orderProductIds, OrderStatus status, String userId) {
+        this.name = name;
+        this.orderProducts.clear();
+        for(Long productId : orderProductIds){
+            this.addOrderProducts(OrderProduct.builder().productId(productId).build());
+        }
         this.status = status;
         this.updatedBy = userId;
     }
@@ -63,7 +78,8 @@ public class Order {
     public OrderResDto toResDto(){
         return new OrderResDto(
                 this.id,
-                this.orderItemIds,
+                this.name,
+                this.orderProducts.stream().map(OrderProduct::getProductId).toList(),
                 this.status.toString()
         );
     }

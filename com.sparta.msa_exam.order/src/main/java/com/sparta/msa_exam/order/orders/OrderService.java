@@ -3,6 +3,7 @@ package com.sparta.msa_exam.order.orders;
 import com.sparta.msa_exam.order.core.clients.ProductClient;
 import com.sparta.msa_exam.order.core.clients.ProductResDto;
 import com.sparta.msa_exam.order.core.domain.Order;
+import com.sparta.msa_exam.order.core.domain.OrderProduct;
 import com.sparta.msa_exam.order.core.enums.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,18 +21,21 @@ public class OrderService {
 
     @Transactional
     public OrderResDto createOrder(OrderReqDto requestDto, String userId){
-        for( Long productId : requestDto.getOrderItemIds()){
+        for( Long productId : requestDto.getOrderProductIds()){
             ProductResDto product = productClient.getProductById(productId);
             if(product == null || product.getQuantity() < 1){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product is sold out");
             }
         }
 
-        for(Long productId : requestDto.getOrderItemIds()){
+        for(Long productId : requestDto.getOrderProductIds()){
             productClient.reduceQuantity(productId,1, userId);
         }
 
         Order order = requestDto.toEntity();
+        for(Long productId : requestDto.getOrderProductIds()){
+            order.addOrderProducts(OrderProduct.builder().productId(productId).build());
+        }
         order.setCreated(userId);
         return orderRepository.save(order).toResDto();
     }
@@ -49,7 +53,7 @@ public class OrderService {
                 .filter(o -> o.getDeletedAt() == null)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found or has been deleted"));
 
-        order.updateOrder(requestDto.getOrderItemIds(), OrderStatus.valueOf(requestDto.getStatus()) ,userId);
+        order.updateOrder(requestDto.getName(), requestDto.getOrderProductIds(), OrderStatus.valueOf(requestDto.getStatus()) ,userId);
         return order.toResDto();
     }
 
