@@ -8,8 +8,8 @@ public interface ProductClient {
     @GetMapping("/api/products/{productId}")
     ProductResDto getProductById(@PathVariable("productId") Long productId);
 
-    @PutMapping("/api/products/{productId}/reduceQuantity")
-    void reduceQuantity(@PathVariable Long productId,
+    @PutMapping("/api/products/{productId}/updateQuantity")
+    void updateQuantity(@PathVariable Long productId,
                         @RequestParam Integer quantity,
                         @RequestHeader(value = "X-User-Id") String userId);
 }

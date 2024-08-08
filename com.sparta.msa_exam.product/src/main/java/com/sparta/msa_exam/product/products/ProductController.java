@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -34,6 +36,23 @@ public class ProductController {
                 .header("Server-Port", String.valueOf(serverPort))
                 .body(res);
     }
+
+    /*
+    상품 전체 조회
+    Request
+    Path /api/products
+
+    Response
+    List<ProductResDto>
+     */
+    @GetMapping
+    public ResponseEntity<List<ProductResDto>> getAllProducts() {
+        List<ProductResDto> res = productService.getAllProducts();
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Server-Port", String.valueOf(serverPort))
+                .body(res);
+    }
+
 
     /*
     상품 단건 조회
@@ -91,7 +110,7 @@ public class ProductController {
 
     /*
     상품 삭제
-    path /api/products/{productId}/reduceQuantity
+    path /api/products/{productId}/updateQuantity
 
     Request
     header X-User-Id : userId
@@ -100,11 +119,11 @@ public class ProductController {
     Response
     message
      */
-    @PutMapping("/{productId}/reduceQuantity")
-    public ResponseEntity<String> reduceQuantity(@PathVariable Long productId,
+    @PutMapping("/{productId}/updateQuantity")
+    public ResponseEntity<String> updateQuantity(@PathVariable Long productId,
                                                  @RequestParam Integer quantity,
                                                  @RequestHeader(value = "X-User-Id") String userId) {
-        productService.reduceQuantity(productId, quantity, userId);
-        return ResponseEntity.ok("Reduced quantity of product successfully");
+        productService.updateQuantity(productId, quantity, userId);
+        return ResponseEntity.ok("Updated quantity of product successfully");
     }
 }

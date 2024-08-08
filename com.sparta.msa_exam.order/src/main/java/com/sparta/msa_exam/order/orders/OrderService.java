@@ -29,7 +29,7 @@ public class OrderService {
         }
 
         for(Long productId : requestDto.getOrderProductIds()){
-            productClient.reduceQuantity(productId,1, userId);
+            productClient.updateQuantity(productId,-1, userId);
         }
 
         Order order = requestDto.toEntity();
@@ -53,6 +53,16 @@ public class OrderService {
                 .filter(o -> o.getDeletedAt() == null)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found or has been deleted"));
 
+        // 주문 상품 리스트를 새로 업뎃 예정이기 때문에 수량 다시 +1
+        for(OrderProduct product : order.getOrderProducts()){
+            productClient.updateQuantity(product.getProductId(),1, userId);
+        }
+
+        // 업데이트 된 주문 상품 리스트 수량 -1
+        for(Long productId : requestDto.getOrderProductIds()){
+            productClient.updateQuantity(productId,-1, userId);
+        }
+
         order.updateOrder(requestDto.getName(), requestDto.getOrderProductIds(), OrderStatus.valueOf(requestDto.getStatus()) ,userId);
         return order.toResDto();
     }
@@ -62,6 +72,12 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .filter(o -> o.getDeletedAt() == null)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found or has been deleted"));
+
+        // 주문 취소 때문에 수량 다시 +1
+        for(OrderProduct product : order.getOrderProducts()){
+            productClient.updateQuantity(product.getProductId(),1, userId);
+        }
+
         order.setDeleted(userId);
     }
 
